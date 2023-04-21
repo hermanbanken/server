@@ -18,7 +18,7 @@ export default function(opt) {
     const landingPage = opt.landing || 'https://localtunnel.github.io/www/';
 
     function GetClientIdFromHostname(hostname) {
-        return myTldjs.getSubdomain(hostname);
+        return opt.subdomains ? myTldjs.getSubdomain(hostname) : "default";
     }
 
     const manager = new ClientManager(opt);
@@ -65,11 +65,13 @@ export default function(opt) {
 
         const isNewClientRequest = ctx.query['new'] !== undefined;
         if (isNewClientRequest) {
-            const reqId = hri.random();
+            const reqId = opt.subdomains ? hri.random() : "default";
             debug('making new client with id %s', reqId);
             const info = await manager.newClient(reqId);
 
-            const url = schema + '://' + info.id + '.' + ctx.request.host;
+            const url = opt.subdomains
+              ? schema + '://' + info.id + '.' + ctx.request.host
+              : schema + '://' + ctx.request.host;
             info.url = url;
             ctx.body = info;
             return;
